@@ -60,7 +60,7 @@ export default function Home() {
         <div className="image-wrapper ">
           <img
             ref={imgRef}
-            className="image border-x-fuchsia-600 rounded mx-auto md:w-4/6 h-auto object-contain"
+            className="image border-x-fuchsia-600 rounded mx-auto md:w-4/6 h-6/6 object-contain"
             src="Her2.png"
             alt=""
           />

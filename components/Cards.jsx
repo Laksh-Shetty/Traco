@@ -41,7 +41,7 @@ const Cards = () => {
 
   return (
     <>
-      <section className="max-w-8xl mx-auto px-6 py-20 container bg-gray-50">
+      <section className="w-full mx-auto px-6 py-20 container bg-gray-50">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
           Key Features
         </h2>
