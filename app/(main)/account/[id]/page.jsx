@@ -23,7 +23,7 @@ const page = async ({ params }) => {
           {accountData.type} ACCOUNT
         </p>
 
-        <div className="">
+        <div className="text-gray-400">
           <p className="font-bold">Balance: ₹{accountData.balance}</p>
           <p className="font-bold">
             {" "}

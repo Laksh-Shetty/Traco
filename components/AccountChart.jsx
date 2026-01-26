@@ -102,13 +102,13 @@ const expense = filteredTransactions
     <div className="my-8 p-4 bg-white rounded-lg shadow-md">
       <div className="flex flex-col md:flex-row justify-between ">
         <div>
-          <h2 className="text-3xl font-bold text-center mt-8">
+          <h2 className="text-3xl font-bold text-center mt-8 text-black">
             Transaction Overview
           </h2>
         </div>
 
         <div>
-          <div className="flex justify-center">
+          <div className="flex justify-center text-black">
             <DropdownMenu>
               <DropdownMenuTrigger className="btn m-4" asChild>
                <Button variant="outline">
@@ -133,7 +133,7 @@ const expense = filteredTransactions
       </div>
 
       <div>
-        <h2>
+        <h2 className="text-black">
             Total Transactions: {filteredTransactions.length}
         </h2>
       </div>

@@ -36,11 +36,11 @@ const Page = async () => {
 
       </div>
 
-      <div className="m-10 gap-4">
+      <div className="m-10 gap-4 hover:text-gray-400">
         <Drawerbox>
-          <div className="flex h-full flex-col items-center justify-center text-center">
+          <div className="flex h-full flex-col items-center justify-center text-center ">
             <Plus className="h-10 w-10 mb-2" />
-            <p className="text-sm font-medium">Add New Account</p>
+            <p className="text-sm font-medium ">Add New Account</p>
           </div>
         </Drawerbox>
 
