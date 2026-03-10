@@ -1,27 +1,33 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import DashboardBootstrap from "@/components/DashboardBootstrap";
 
 async function bootstrapUser() {
   const { userId } = await auth();
-  if (!userId) return;
+  if (!userId) redirect("/Sign-in");
 
-  const clerkUser = await currentUser();
-  if (!clerkUser) return;
-
-  let user = await db.user.findUnique({ where: { clerkUserId: userId } });
-
-  if (!user) {
-    user = await db.user.create({
-      data: {
-        clerkUserId: userId,
-        email: clerkUser.emailAddresses[0]?.emailAddress ?? "",
-        name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim(),
-        imageUrl: clerkUser.imageUrl ?? "",
-      },
-    });
+  let clerkUser = await currentUser();
+  if (!clerkUser) {
+    await new Promise((r) => setTimeout(r, 500));
+    clerkUser = await currentUser();
   }
+  if (!clerkUser) redirect("/Sign-in");
 
-  const hasAccount = await db.account.findFirst({ where: { userId: user.id } });
+  const user = await db.user.upsert({
+    where: { clerkUserId: userId },
+    update: {},
+    create: {
+      clerkUserId: userId,
+      email: clerkUser.emailAddresses[0]?.emailAddress ?? "",
+      name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim(),
+      imageUrl: clerkUser.imageUrl ?? "",
+    },
+  });
+
+  const hasAccount = await db.account.findFirst({
+    where: { userId: user.id },
+  });
 
   if (!hasAccount) {
     await db.account.create({
@@ -34,9 +40,21 @@ async function bootstrapUser() {
       },
     });
   }
+
+  return true;
 }
 
 export default async function DashboardLayout({ children }) {
-  await bootstrapUser();
-  return <>{children}</>;
+  let userReady = false;
+  try {
+    userReady = await bootstrapUser();
+  } catch {
+    userReady = false;
+  }
+
+  return (
+    <DashboardBootstrap userReady={userReady}>
+      {children}
+    </DashboardBootstrap>
+  );
 }

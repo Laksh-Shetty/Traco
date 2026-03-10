@@ -1,37 +1,33 @@
 "use server";
-import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
-import { TransactionType } from "@prisma/client";
-import { revalidatePath } from "next/cache";
-import { date } from "zod";
 
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+
+async function getDbUser(userId) {
+  const user = await db.user.findUnique({ where: { clerkUserId: userId } });
+  return user ?? null;
+}
 
 export async function getBudget() {
   const { userId } = await auth();
-  if (!userId) throw new Error("User not authenticated");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
+  if (!userId) return null;
+  const user = await getDbUser(userId);
+  if (!user) return null;
 
   const budget = await db.budget.findFirst({
     where: { userId: user.id },
-    orderBy: { createdAt: "desc" }, 
+    orderBy: { createdAt: "desc" },
   });
 
   return budget ? { ...budget, amount: Number(budget.amount) } : null;
 }
 
-
 export async function updateBudget(amount) {
   const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
+  if (!userId) throw new Error("User not authenticated");
+  const user = await getDbUser(userId);
+  if (!user) throw new Error("User not ready");
 
   let budget = await db.budget.findFirst({ where: { userId: user.id } });
 
@@ -45,52 +41,34 @@ export async function updateBudget(amount) {
       data: { amount, userId: user.id },
     });
   }
-  revalidatePath("/dashboard");
 
+  revalidatePath("/dashboard");
   return { ...budget, amount: Number(budget.amount) };
 }
 
 export async function defaultBudget() {
   const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+  if (!userId) return 0;
+  const user = await getDbUser(userId);
+  if (!user) return 0;
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
-
-  // Try finding default account
-  let account = await db.account.findFirst({
+  const account = await db.account.findFirst({
     where: { userId: user.id, isDefault: true },
   });
 
-  // 👇 CREATE if missing (new user fix)
-  if (!account) {
-    account = await db.account.create({
-      data: {
-        userId: user.id,
-        name: "Practice Account",
-        balance: 0,
-        isDefault: true,
-        type:"SAVINGS"
-      },
-    });
-  }
+  if (!account) return 0;
 
-  const startDate = new Date();
-  startDate.setDate(1);
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
 
   const expense = await db.transaction.aggregate({
     where: {
       accountId: account.id,
       type: "EXPENSE",
-      date: {
-        gte: startDate,
-      },
+      date: { gte: startOfMonth },
     },
-    _sum: {
-      amount: true,
-    },
+    _sum: { amount: true },
   });
 
   return Number(expense._sum.amount || 0);

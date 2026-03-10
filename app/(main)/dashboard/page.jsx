@@ -18,7 +18,7 @@ const Page = async () => {
 
   return (
     <div>
-      <div className="gradient-title text-5xl font-bold mb-6 ml-6 mt-4">
+      <div className="gradient-title text-5xl font-bold mb-6 ml-6 mt-4 py-4" >
         Dashboard
       </div>
 
