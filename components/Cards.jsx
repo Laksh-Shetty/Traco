@@ -1,98 +1,126 @@
-import React from "react";
+"use client";
 
-const Cards = () => {
-  const cards = [
-    {
-      title: "Budgeting",
-      description: "Create and manage budgets to keep your spending on track.",
-      video: "money-bag.mp4",
-    },
-    {
-      title: "Expense Tracking",
-      description:
-        "Monitor your expenses in real-time with detailed categorization.",
-      video: "line-chart.mp4",
-    },
-    {
-      title: "Email Notifications",
-      description:
-        "Receive timely email alerts for important account activities.",
-      video: "message.mp4",
-    },
-    {
-      title: "Effortless Access",
-      description:
-        "Access your financial data anytime, anywhere with our user-friendly platform.",
-      video: "click.mp4",
-    },
-    {
-      title: "AI-Powered Insights",
-      description:
-        "Leverage AI to gain personalized financial insights and recommendations.",
-      video: "artificial-intelligence.mp4",
-    },
-    {
-      title: "Save More",
-      description:
-        "Utilize our tools to identify saving opportunities and reach your goals faster.",
-      video: "save-money.mp4",
-    },
-  ];
+import React, { useRef } from "react";
+
+const cards = [
+  {
+    title: "Budgeting",
+    description: "Create and manage budgets to keep your spending on track every month.",
+    video: "money-bag.mp4",
+    accent: "#2271f0",
+  },
+  {
+    title: "Expense Tracking",
+    description: "Monitor expenses in real-time with automatic detailed categorization.",
+    video: "line-chart.mp4",
+    accent: "#d006d4",
+  },
+  {
+    title: "Email Notifications",
+    description: "Receive timely alerts for budget limits, due dates, and account activity.",
+    video: "message.mp4",
+    accent: "#2271f0",
+  },
+  {
+    title: "Effortless Access",
+    description: "Your financial data available anytime, on any device, instantly.",
+    video: "click.mp4",
+    accent: "#d006d4",
+  },
+  {
+    title: "AI-Powered Insights",
+    description: "Leverage AI to surface personalized financial insights and recommendations.",
+    video: "artificial-intelligence.mp4",
+    accent: "#2271f0",
+  },
+  {
+    title: "Save More",
+    description: "Identify saving opportunities automatically and reach your goals faster.",
+    video: "save-money.mp4",
+    accent: "#d006d4",
+  },
+];
+
+function Card({ card, index }) {
+  const videoRef = useRef(null);
 
   return (
-    <>
-      <section className="w-full mx-auto px-6 py-20 container bg-gray-50">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-          Key Features
-        </h2>
+    <div
+      className="group relative rounded-2xl p-7 flex flex-col gap-5 cursor-default transition-all duration-300 overflow-hidden"
+      style={{
+        border: "1px solid rgba(34,113,240,0.12)",
+        background: "rgba(255,255,255,0.02)",
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = `${card.accent}55`;
+        e.currentTarget.style.background = `${card.accent}08`;
+        e.currentTarget.style.transform = "translateY(-3px)";
+        e.currentTarget.style.boxShadow = `0 16px 48px ${card.accent}15`;
+        videoRef.current?.play();
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = "rgba(34,113,240,0.12)";
+        e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
+        videoRef.current?.pause();
+      }}
+    >
+      
+      <div
+        className="absolute top-4 right-5 font-mono font-black select-none pointer-events-none transition-colors duration-300"
+        style={{ fontSize: 56, lineHeight: 1, color: "rgba(34,113,240,0.05)" }}
+      >
+        {String(index + 1).padStart(2, "0")}
+      </div>
 
-        <p className="text-center text-gray-500 max-w-2xl mx-auto mb-14">
-          Everything you need to track, manage, and understand your finances
-          effortlessly.
+      
+      <div
+        className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300"
+        style={{
+          border: `1px solid ${card.accent}30`,
+          background: `${card.accent}10`,
+        }}
+      >
+        <video
+          ref={videoRef}
+          className="w-full h-full object-contain rounded-xl"
+          loop
+          muted
+          playsInline
+          preload="auto"
+          src={card.video}
+        />
+      </div>
+
+      <div className="relative z-10">
+        <h3
+          className="font-bold text-base mb-2 text-white tracking-tight"
+          style={{ fontFamily: "'Syne', system-ui" }}
+        >
+          {card.title}
+        </h3>
+        <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>
+          {card.description}
         </p>
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-          {cards.map((card, index) => (
-            <div
-              key={index}
-              className="
-            group
-            border border-blue-100
-            bg-white
-            p-6
-            rounded-2xl
-            shadow-sm
-            hover:shadow-xl
-            hover:-translate-y-1
-            transition-all
-            duration-300
-            flex
-            flex-col
-            items-center
-            text-center
-            min-h-[280px]
-          "
-            >
-              <video
-                className="mx-auto mb-4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                width={70}
-                src={card.video}
-              />
+      
+      <div
+        className="absolute bottom-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ background: `linear-gradient(90deg, transparent, ${card.accent}, transparent)` }}
+      />
+    </div>
+  );
+}
 
-              <h3 className="font-semibold text-lg mb-2">{card.title}</h3>
-
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {card.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
+const Cards = () => {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      {cards.map((card, index) => (
+        <Card key={index} card={card} index={index} />
+      ))}
+    </div>
   );
 };
 
