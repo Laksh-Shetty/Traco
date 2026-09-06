@@ -35,7 +35,7 @@ const aj = arcjet({
 
 export default clerkMiddleware(
   async (auth, req) => {
-    // Don't let Arcjet interfere with Clerk's Frontend API proxy.
+    // Don't let Arcjet interfere with Clerk's proxy path.
     if (!req.nextUrl.pathname.startsWith("/__clerk")) {
       const decision = await aj.protect(req);
 
@@ -63,6 +63,6 @@ export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
-    "/__clerk/(.*)",
+    "/__clerk/:path*",
   ],
 };
