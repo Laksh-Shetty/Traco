@@ -35,15 +35,18 @@ const aj = arcjet({
 
 export default clerkMiddleware(
   async (auth, req) => {
-    const { userId, redirectToSignIn } = await auth();
+    // Don't let Arcjet interfere with Clerk's Frontend API proxy.
+    if (!req.nextUrl.pathname.startsWith("/__clerk")) {
+      const decision = await aj.protect(req);
 
-    const decision = await aj.protect(req);
-
-    if (decision.isDenied()) {
-      return new Response("Forbidden", {
-        status: 403,
-      });
+      if (decision.isDenied()) {
+        return new Response("Forbidden", {
+          status: 403,
+        });
+      }
     }
+
+    const { userId, redirectToSignIn } = await auth();
 
     if (isProtectedRoute(req) && !userId) {
       return redirectToSignIn();
@@ -59,10 +62,7 @@ export default clerkMiddleware(
 export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-
     "/(api|trpc)(.*)",
-
-    "/__clerk",
     "/__clerk/(.*)",
   ],
 };
