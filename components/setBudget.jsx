@@ -31,6 +31,8 @@ const SetBudget = ({ budget, expense }) => {
     setIsEditing(false);
   };
 
+  const usedPct = budget?.amount ? (expense / budget.amount) * 100 : 0;
+
   return (
     <Card className="mx-10">
       <CardHeader>
@@ -96,21 +98,20 @@ const SetBudget = ({ budget, expense }) => {
       w-full h-2 rounded-full
       [&>div]:transition-all
       ${
-        expense / budget.amount < 0.6
+        usedPct < 60
           ? "[&>div]:bg-gradient-to-r [&>div]:from-green-400 [&>div]:to-green-600"
-          : expense / budget.amount < 0.9
+          : usedPct < 90
           ? "[&>div]:bg-gradient-to-r [&>div]:from-yellow-400 [&>div]:to-orange-500"
           : "[&>div]:bg-gradient-to-r [&>div]:from-red-500 [&>div]:to-red-700"
       }
     `}
           />
         )}
-
-        
       </CardFooter>
+
       <p className="text-sm text-gray-500 text-right px-8">
-            {(expense / (budget?.amount)*100).toFixed(2)}% used
-        </p>
+        {usedPct.toFixed(2)}% used
+      </p>
     </Card>
   );
 };

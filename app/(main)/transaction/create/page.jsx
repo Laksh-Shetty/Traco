@@ -25,8 +25,6 @@ if (txn) {
 
 }
 
-
-
   return (
   <div className="max-w-4xl mx-auto space-y-8 py-12 px-4">
     <h1 className="gradient-title text-5xl font-bold text-center">

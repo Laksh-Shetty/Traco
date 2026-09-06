@@ -7,6 +7,12 @@ async function bootstrapUser() {
   const { userId } = await auth();
   if (!userId) redirect("/Sign-in");
 
+  const existingUser = await db.user.findUnique({
+    where: { clerkUserId: userId },
+    select: { id: true },
+  });
+  if (existingUser) return true;
+
   let clerkUser = await currentUser();
   if (!clerkUser) {
     await new Promise((r) => setTimeout(r, 500));
@@ -14,10 +20,8 @@ async function bootstrapUser() {
   }
   if (!clerkUser) redirect("/Sign-in");
 
-  const user = await db.user.upsert({
-    where: { clerkUserId: userId },
-    update: {},
-    create: {
+  const user = await db.user.create({
+    data: {
       clerkUserId: userId,
       email: clerkUser.emailAddresses[0]?.emailAddress ?? "",
       name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim(),
@@ -25,21 +29,15 @@ async function bootstrapUser() {
     },
   });
 
-  const hasAccount = await db.account.findFirst({
-    where: { userId: user.id },
+  await db.account.create({
+    data: {
+      name: "Primary Account",
+      type: "SAVINGS",
+      balance: 1000,
+      isDefault: true,
+      userId: user.id,
+    },
   });
-
-  if (!hasAccount) {
-    await db.account.create({
-      data: {
-        name: "Primary Account",
-        type: "SAVINGS",
-        balance: 1000,
-        isDefault: true,
-        userId: user.id,
-      },
-    });
-  }
 
   return true;
 }

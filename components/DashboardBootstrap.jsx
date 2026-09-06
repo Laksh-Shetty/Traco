@@ -9,7 +9,7 @@ export default function DashboardBootstrap({ children, userReady }) {
 
   useEffect(() => {
     if (!userReady) {
-      // User not in DB yet — show setup animation then hard reload
+      
       setShowSetup(true);
       return;
     }
@@ -23,8 +23,7 @@ export default function DashboardBootstrap({ children, userReady }) {
   }, [userReady]);
 
   const handleComplete = () => {
-    if (!userReady) {
-      // Bootstrap wasn't done — reload the page now that animation has played
+    if (!userReady) {      
       window.location.reload();
       return;
     }

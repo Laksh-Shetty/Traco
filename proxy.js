@@ -1,43 +1,67 @@
-import arcjet, { createMiddleware, detectBot, shield } from '@arcjet/next';
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import arcjet, {
+  detectBot,
+  shield,
+} from "@arcjet/next";
+
+import {
+  clerkMiddleware,
+  createRouteMatcher,
+} from "@clerk/nextjs/server";
+
 const isProtectedRoute = createRouteMatcher([
   "/secure(.*)",
   "/dashboard(.*)",
   "/transaction(.*)",
   "/account(.*)",
-])
+]);
 
-const aj= arcjet({
-  key:process.env.ARCJET_KEY,
-  rules:[
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+
+  rules: [
     shield({
       mode: "LIVE",
     }),
+
     detectBot({
-      mode:"LIVE",
-      allow:[
+      mode: "LIVE",
+      allow: [
         "CATEGORY:SEARCH_ENGINE",
-        "GO_HTTP"
+        "GO_HTTP",
       ],
-    })
-  ]
+    }),
+  ],
 });
 
-const clerk= clerkMiddleware(async (auth,req)=> {
-  const {userId, redirectToSignIn} =await auth();
+export default clerkMiddleware(
+  async (auth, req) => {
+    const { userId, redirectToSignIn } = await auth();
 
-  if (isProtectedRoute(req) && !userId) {
-    return redirectToSignIn(); 
+    const decision = await aj.protect(req);
+
+    if (decision.isDenied()) {
+      return new Response("Forbidden", {
+        status: 403,
+      });
+    }
+
+    if (isProtectedRoute(req) && !userId) {
+      return redirectToSignIn();
+    }
+  },
+  {
+    frontendApiProxy: {
+      enabled: true,
+    },
   }
-});
-
-export default createMiddleware(aj,clerk);
+);
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+
+    "/(api|trpc)(.*)",
+
+    "/__clerk/(.*)",
   ],
 };
