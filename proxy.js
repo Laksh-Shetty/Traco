@@ -62,6 +62,7 @@ export const config = {
 
     "/(api|trpc)(.*)",
 
+    "/__clerk",
     "/__clerk/(.*)",
   ],
 };
